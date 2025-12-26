@@ -1,0 +1,46 @@
+[build-system]
+requires = [
+    "setuptools>=45",
+    "wheel",
+    "numpy>=1.17.0",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "apriltag-python"
+version = "0.0.1"
+description = "Python wrapper for AprilTag visual fiducial detector"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "BSD-2-Clause"
+authors = [
+    {name = "AprilRobotics Team"},
+    {name = "chibai"}
+]
+keywords = ["apriltag", "fiducial", "marker", "detection", "computer vision", "robotics"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: C",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development",
+]
+dependencies = [
+    "numpy>=1.17.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/chibai/apriltag-python"
+"Bug Reports" = "https://github.com/chibai/apriltag-python/issues"
+Source = "https://github.com/chibai/apriltag-python"
+"AprilTag C Library" = "https://github.com/AprilRobotics/apriltag"

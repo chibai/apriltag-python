@@ -205,3 +205,25 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# CMake build artifacts
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+*.cmake
+Makefile
+CTestTestfile.cmake
+_deps/
+
+# AprilTag specific
+apriltag_detect_docstring.h
+apriltag_py_type_docstring.h
+*.dylib
+*.dll
+
+# Auto-generated type stubs (uncomment to ignore)
+# apriltag.pyi
+
+# Examples output
+examples/*_detected.jpg
+examples/*.png

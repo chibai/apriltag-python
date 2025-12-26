@@ -1,0 +1,29 @@
+include README.md
+include LICENSE
+include pyproject.toml
+include setup.py
+include generate_stubs.py
+include apriltag.pyi
+include py.typed
+
+# Include all AprilTag C source files
+recursive-include apritag *.c *.h *.in
+recursive-include apritag/common *.c *.h
+recursive-include apritag/CMake *
+
+# Include CMake files
+include apritag/CMakeLists.txt
+include apritag/package.xml
+include apritag/LICENSE.md
+
+# Include docstring files
+include apritag/*.docstring
+
+# Exclude build artifacts
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude __pycache__
+global-exclude .git*
+global-exclude *.so
+global-exclude *.dylib
+global-exclude *.dll
