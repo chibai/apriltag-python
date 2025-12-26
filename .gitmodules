@@ -1,0 +1,3 @@
+[submodule "apritag"]
+	path = apritag
+	url = https://github.com/AprilRobotics/apriltag
