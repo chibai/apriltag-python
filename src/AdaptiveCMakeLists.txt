@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(apriltag VERSION 3.4.2 LANGUAGES C)
+project(apriltag VERSION 3.4.3 LANGUAGES C)
 
 if(POLICY CMP0077)
     cmake_policy(SET CMP0077 NEW)
@@ -34,6 +34,10 @@ set(default_build_type "Release")
 
 SET(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 
+if(WIN32)
+    add_compile_definitions(WIN32_LEAN_AND_MEAN)
+endif()
+
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     message(STATUS "Setting build type to '${default_build_type}' as none was specified.")
     set(CMAKE_BUILD_TYPE "${default_build_type}" CACHE  STRING "Choose the type of build." FORCE)
@@ -43,7 +47,14 @@ endif()
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
     add_compile_options(-Wall -Wextra -Werror)
-    # add_compile_options(-Wpedantic)
+    add_compile_options(-Wpedantic)
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        add_compile_options(
+            -Wno-gnu-zero-variadic-macro-arguments
+            -Wno-strict-prototypes
+            -Wno-static-in-inline
+        )
+    endif()
     add_compile_options(-Wno-shift-negative-value)
 endif()
 
@@ -104,7 +115,7 @@ set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
 set(targets_export_name "${PROJECT_NAME}Targets")
-set(config_install_dir "share/${PROJECT_NAME}/cmake")
+set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/${PROJECT_NAME}/cmake")
 
 # Include module with fuction 'write_basic_package_version_file'
 include(CMakePackageConfigHelpers)
@@ -215,5 +226,6 @@ if (BUILD_EXAMPLES)
 endif()
 
 if(BUILD_TESTING)
+    enable_testing()
     add_subdirectory(test)
 endif()
