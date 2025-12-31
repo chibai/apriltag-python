@@ -11,7 +11,6 @@ configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/apriltag/apriltag/CMakeLists.txt
     COPYONLY
 )
-#set(CMAKE_FIND_DEBUG_MODE TRUE)
 # Set rpath for shared libraries to be found at runtime
 if(APPLE)
     set(CMAKE_INSTALL_RPATH "@loader_path")
