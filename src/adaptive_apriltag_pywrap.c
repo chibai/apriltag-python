@@ -69,6 +69,7 @@ typedef struct {
 
     apriltag_family_t*   tf;
     apriltag_detector_t* td;
+    PyThread_type_lock   det_lock;
     void (*destroy_func)(apriltag_family_t *tf);
 } apriltag_py_t;
 
@@ -85,6 +86,12 @@ apriltag_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
 
     self->tf = NULL;
     self->td = NULL;
+
+    self->det_lock = PyThread_allocate_lock();
+    if (self->det_lock == NULL) {
+        PyErr_SetString(PyExc_RuntimeError, "Unable to allocate detection lock");
+        goto done;
+    }
 
     const char* family          = NULL;
     int         Nthreads        = 1;
@@ -174,6 +181,11 @@ apriltag_new(PyTypeObject *type, PyObject *args, PyObject *kwargs)
                 self->destroy_func(self->tf);
                 self->tf = NULL;
             }
+            if(self->det_lock != NULL)
+            {
+                PyThread_free_lock(self->det_lock);
+                self->det_lock = NULL;
+            }
             Py_DECREF(self);
         }
         return NULL;
@@ -195,6 +207,11 @@ static void apriltag_dealloc(apriltag_py_t* self)
     {
         self->destroy_func(self->tf);
         self->tf = NULL;
+    }
+    if(self->det_lock != NULL)
+    {
+        PyThread_free_lock(self->det_lock);
+        self->det_lock = NULL;
     }
 
     Py_TYPE(self)->tp_free((PyObject*)self);
@@ -245,7 +262,13 @@ static PyObject* apriltag_detect(apriltag_py_t* self,
                      .stride = strides[0],
                      .buf    = PyArray_DATA(image)};
 
-    zarray_t* detections = apriltag_detector_detect(self->td, &im);
+    zarray_t *detections = NULL;  // Declare detections variable outside the GIL macro block
+    Py_BEGIN_ALLOW_THREADS  // Release the GIL to allow other Python threads to run
+        PyThread_acquire_lock(self->det_lock, 1);  // Acquire the detection lock before running the detector (blocks until the lock is available)
+        detections = apriltag_detector_detect(self->td, &im);  // Run detection
+        PyThread_release_lock(self->det_lock);  // Release the detection lock
+    Py_END_ALLOW_THREADS  // Acquire the GIL after releasing the detection lock
+
     int N = zarray_size(detections);
 
     if (N == 0 && errno == EAGAIN){
