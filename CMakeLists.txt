@@ -1,9 +1,9 @@
-# Top-level CMakeLists.txt for scikit-build-core
-cmake_minimum_required(VERSION 3.16)
-project(${SKBUILD_PROJECT_NAME}
-        VERSION ${SKBUILD_PROJECT_VERSION}
-        DESCRIPTION "Python wrapper for the AprilTag visual fiducial detector"
-        LANGUAGES C)
+# Copy adaptive_apriltag_pywrap.c to replace apriltag's apriltag_pywrap.c
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/adaptive_apriltag_pywrap.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/apriltag/apriltag/apriltag_pywrap.c
+    COPYONLY
+)
 
 # Copy AdaptiveCMakeLists.txt to replace apriltag's CMakeLists.txt
 configure_file(
@@ -11,6 +11,15 @@ configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/src/apriltag/apriltag/CMakeLists.txt
     COPYONLY
 )
+
+
+# Top-level CMakeLists.txt for scikit-build-core
+cmake_minimum_required(VERSION 3.16)
+project(${SKBUILD_PROJECT_NAME}
+        VERSION ${SKBUILD_PROJECT_VERSION}
+        DESCRIPTION "Python wrapper for the AprilTag visual fiducial detector"
+        LANGUAGES C)
+
 # Set rpath for shared libraries to be found at runtime
 if(APPLE)
     set(CMAKE_INSTALL_RPATH "@loader_path")
