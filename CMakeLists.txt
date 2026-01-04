@@ -1,17 +1,10 @@
-# Copy adaptive_apriltag_pywrap.c to replace apriltag's apriltag_pywrap.c
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/adaptive_apriltag_pywrap.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/apriltag/apriltag/apriltag_pywrap.c
+foreach(X IN ITEMS apriltag_detect.docstring apriltag_estimate_tag_pose.docstring apriltag_pywrap.c CMakeLists.txt)
+    configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/${X}
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/apriltag/apriltag/${X}
     COPYONLY
 )
-
-# Copy AdaptiveCMakeLists.txt to replace apriltag's CMakeLists.txt
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/AdaptiveCMakeLists.txt
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/apriltag/apriltag/CMakeLists.txt
-    COPYONLY
-)
-
+endforeach()
 
 # Top-level CMakeLists.txt for scikit-build-core
 cmake_minimum_required(VERSION 3.16)

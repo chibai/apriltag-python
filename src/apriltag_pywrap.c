@@ -356,28 +356,6 @@ static PyObject* apriltag_detect(apriltag_py_t* self,
     return result;
 }
 
-static const char apriltag_estimate_tag_pose_docstring[] =
-    "estimate_tag_pose(detection, tagsize, fx, fy, cx, cy) -> dict\n"
-    "\n"
-    "Estimate the 6-DOF pose of a detected AprilTag.\n"
-    "\n"
-    "ARGUMENTS\n"
-    "\n"
-    "- detection: dict returned by the detect() method containing tag detection info\n"
-    "\n"
-    "- tagsize: the physical size of the tag in meters (side length)\n"
-    "\n"
-    "- fx, fy: focal lengths in pixels\n"
-    "\n"
-    "- cx, cy: principal point coordinates in pixels\n"
-    "\n"
-    "RETURNED VALUE\n"
-    "\n"
-    "Returns a dict containing:\n"
-    "- 'R': 3x3 rotation matrix as numpy array\n"
-    "- 't': 3x1 translation vector as numpy array (in meters)\n"
-    "- 'error': reprojection error\n";
-
 static PyObject* apriltag_estimate_tag_pose(apriltag_py_t* self,
                                              PyObject* args)
 {
@@ -515,6 +493,7 @@ cleanup:
 
 #include "apriltag_detect_docstring.h"
 #include "apriltag_py_type_docstring.h"
+#include "apriltag_estimate_tag_pose_docstring.h"
 
 static PyMethodDef apriltag_methods[] =
     { PYMETHODDEF_ENTRY(apriltag_, detect, METH_VARARGS),
