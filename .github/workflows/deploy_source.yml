@@ -1,4 +1,4 @@
-name: PyPI manylinux_aarch64 deployer
+name: PyPI source deployer
 on:
   push:
     tags:
