@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "apriltag-python"
-version = "3.4.4"
+version = "3.4.5"
 description = "Python wrapper for the AprilTag visual fiducial detector"
 readme = "README.md"
 license = {text = "BSD-2-Clause"}
