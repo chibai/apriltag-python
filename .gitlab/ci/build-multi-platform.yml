@@ -1,0 +1,49 @@
+.multi-platform-build:
+  stage: build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "develop"'
+    - when: never
+
+build-unix:
+  extends:
+    - .multi-platform-build
+    - .gitlab-unix-python
+  tags:
+    - $RUNNER_OS
+  parallel:
+    matrix:
+      - RUNNER_OS:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
+          - ubuntu-22.04
+          - ubuntu-22.04-arm
+          - ubuntu-slim
+          - macos-26
+          - macos-15
+          - macos-14
+        PYTHON_VERSION: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+  script:
+    - 'echo "Building for OS: $RUNNER_OS, Python: $PYTHON_VERSION"'
+    - uname -m
+    - python -m pip install .
+    - |
+      python -c "import apriltag; print('Successfully imported apriltag'); detector = apriltag.apriltag(family='tag36h11'); print(f'Created detector: {detector}')"
+
+build-windows:
+  extends:
+    - .multi-platform-build
+    - .gitlab-windows-python
+  tags:
+    - $RUNNER_OS
+  parallel:
+    matrix:
+      - RUNNER_OS: [windows-2025, windows-2022]
+        PYTHON_VERSION: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+  script:
+    - |
+      Write-Host "Building for OS: $env:RUNNER_OS, Python: $env:PYTHON_VERSION"
+      python -m pip install .
+      if ($LASTEXITCODE -ne 0) { throw "Package installation failed" }
+      python -c "import apriltag; print('Successfully imported apriltag'); detector = apriltag.apriltag(family='tag36h11'); print(f'Created detector: {detector}')"
+      if ($LASTEXITCODE -ne 0) { throw "Module import or detector creation failed" }

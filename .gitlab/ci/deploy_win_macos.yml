@@ -1,0 +1,43 @@
+.deploy-win-macos:
+  stage: deploy
+  variables:
+    PYTHON_VERSION: "3.12"
+    CIBW_ARCHS_WINDOWS: AMD64
+    CIBW_ARCHS_MACOS: "x86_64 arm64 universal2"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v/'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_WORKFLOW == "deploy_win_macos"'
+    - when: never
+  artifacts:
+    paths:
+      - wheelhouse/*.whl
+
+deploy-windows:
+  extends:
+    - .deploy-win-macos
+    - .gitlab-windows-python
+  tags:
+    - windows-latest
+  script:
+    - |
+      python -m pip install "cibuildwheel==3.3.0" twine
+      if ($LASTEXITCODE -ne 0) { throw "Build dependency installation failed" }
+      python -m cibuildwheel --platform windows --output-dir wheelhouse
+      if ($LASTEXITCODE -ne 0) { throw "Wheel build failed" }
+      Get-ChildItem wheelhouse
+      $wheels = @(Get-ChildItem wheelhouse -Filter *.whl | ForEach-Object { $_.FullName })
+      if ($wheels.Count -eq 0) { throw "No wheels were built" }
+      python -m twine upload --non-interactive --skip-existing @wheels
+      if ($LASTEXITCODE -ne 0) { throw "PyPI upload failed" }
+
+deploy-macos:
+  extends:
+    - .deploy-win-macos
+    - .gitlab-unix-python
+  tags:
+    - macos-latest
+  script:
+    - python -m pip install "cibuildwheel==3.3.0" twine
+    - python -m cibuildwheel --platform macos --output-dir wheelhouse
+    - ls -l wheelhouse
+    - python -m twine upload --non-interactive --skip-existing wheelhouse/*.whl
