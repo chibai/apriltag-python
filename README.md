@@ -28,6 +28,62 @@ pip install apriltag-python
 - Python 3.10 or higher
 - NumPy
 
+## GitLab CI
+
+The root `.gitlab-ci.yml` includes one matching configuration in `.gitlab/ci/`
+for each of the five original files in `.github/workflows/`:
+
+| Workflow / CI filename | Trigger | Jobs |
+| --- | --- | --- |
+| `build-multi-platform.yml` | Push to `develop`, merge request targeting `develop` | 10 OS configurations x Python 3.10-3.14 (50 builds), package installation and detector creation |
+| `deploy_manylinux_aarch64.yml` | Push a `v*` tag or run manually | Build and publish Linux aarch64 wheels |
+| `deploy_manylinux_x86_64.yml` | Push a `v*` tag or run manually | Build and publish Linux x86_64 wheels |
+| `deploy_source.yml` | Push a `v*` tag | Build and publish the source distribution |
+| `deploy_win_macos.yml` | Push a `v*` tag or run manually | Build and publish Windows AMD64 and macOS x86_64, arm64, universal2 wheels |
+
+These files are included fragments; use the root configuration as the GitLab
+pipeline entry point. To reproduce `workflow_dispatch`, select **Run pipeline**
+in GitLab and set `CI_WORKFLOW` to the desired wheel workflow filename without
+`.yml`. This runs only that workflow; source publishing remains tag-only.
+Wheel builds retain cibuildwheel 3.3.0 and CPython 3.10-3.14.
+
+GitLab does not provision GitHub-hosted runners or provide `setup-python` and
+`msvc-dev-cmd` actions. Register runners with the following tags (or change the
+CI tags to match your infrastructure):
+
+- Unix build runners: `ubuntu-24.04`, `ubuntu-24.04-arm`, `ubuntu-22.04`,
+  `ubuntu-22.04-arm`, `ubuntu-slim`, `macos-26`, `macos-15`, `macos-14`.
+  Use the shell executor with Bash, the matching OS/architecture, Git, a C/C++
+  compiler, CMake, and pyenv with Python 3.10-3.14 already installed.
+  Jobs select and verify the requested interpreter and use a job-local venv.
+- Windows build runners: `windows-2025`, `windows-2022`. Use the shell executor
+  with PowerShell, Git, the `py` launcher with Python 3.10-3.14, and Visual Studio
+  C++ build tools. Allow local virtual environment activation scripts. Jobs
+  initialize the x64 MSVC developer environment before building.
+- Linux wheel runners: `ubuntu-24.04-arm` plus `docker` for native aarch64, and
+  `ubuntu-latest` plus `docker` for x86_64. Each runner must have **both** tags,
+  use the Bash shell executor, and provide pyenv Python 3.12 and a running Docker
+  daemon accessible to the runner user. cibuildwheel manages its own build
+  containers; these jobs do not use Docker-in-Docker.
+- Wheel runners for other platforms: `windows-latest` and `macos-latest`, with
+  the corresponding shell setup above and Python 3.12. macOS requires Xcode
+  command-line tools and an SDK supporting both wheel architectures.
+- Source distribution runner: `linux-docker`, using the Docker executor and
+  the `python:3.12` image.
+
+Runner tags are routing labels, not OS installers. Unix/Windows wheel jobs use
+Python 3.12 to run cibuildwheel, which builds the requested Python wheel matrix.
+All jobs recursively check out submodules.
+
+Configure `TWINE_USERNAME` and `TWINE_PASSWORD` as masked GitLab CI/CD variables;
+for a PyPI API token use `__token__` as the username and the token as the password.
+Restrict publishing runners and credentials to trusted refs, protect release
+tags matching `v*`, and use a protected ref when manually publishing with
+protected variables. Uploads are non-interactive and wheels are retained as job
+artifacts. The original GitHub workflows are unchanged; disable publishing on
+one platform if mirroring tags to both GitHub and GitLab to avoid duplicate
+releases (source uploads do not skip existing distributions).
+
 ## Quick Start
 
 ```python

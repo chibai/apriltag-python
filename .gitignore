@@ -208,3 +208,5 @@ __marimo__/
 
 .*
 !.github
+!/.gitlab-ci.yml
+!/.gitlab/

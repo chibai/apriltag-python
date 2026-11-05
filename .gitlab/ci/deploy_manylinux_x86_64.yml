@@ -1,0 +1,22 @@
+deploy-manylinux-x86-64:
+  extends: .gitlab-unix-python
+  stage: deploy
+  tags:
+    - ubuntu-latest
+    - docker
+  variables:
+    PYTHON_VERSION: "3.12"
+    CIBW_ARCHS_LINUX: x86_64
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_TAG =~ /^v/'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $CI_WORKFLOW == "deploy_manylinux_x86_64"'
+    - when: never
+  script:
+    - docker info
+    - python -m pip install "cibuildwheel==3.3.0" packaging twine
+    - python -m cibuildwheel --platform linux --output-dir wheelhouse
+    - ls -l wheelhouse
+    - python -m twine upload --non-interactive --skip-existing wheelhouse/*.whl
+  artifacts:
+    paths:
+      - wheelhouse/*.whl
